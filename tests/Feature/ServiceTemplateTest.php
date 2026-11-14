@@ -128,8 +128,9 @@ test('Supabase starts with provider sign-in off', function () {
         ->and($env['GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID'])->toBe('')
         ->and($env['GOTRUE_EXTERNAL_GITHUB_ENABLED'])->toBe('false')
         ->and($env['GOTRUE_EXTERNAL_DISCORD_ENABLED'])->toBe('false')
-        // Blank keeps the compose default, this stack's address plus /auth/v1/callback.
-        ->and($env['GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI'])->toBe('');
+        // Filled in from the domain, so the address to register is right there.
+        ->and($env['GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI'])->toBe('https://supa.example.com/auth/v1/callback')
+        ->and($env['GOTRUE_EXTERNAL_DISCORD_REDIRECT_URI'])->toBe('https://supa.example.com/auth/v1/callback');
 });
 
 test('Supabase passes the sign-in provider settings to the auth service', function () {

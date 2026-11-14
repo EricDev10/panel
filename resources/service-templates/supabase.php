@@ -40,15 +40,15 @@ return [
         ['key' => 'GOTRUE_EXTERNAL_GOOGLE_ENABLED', 'label' => 'Turn on Google sign-in', 'default' => 'false', 'hint' => 'true once you have the client id and secret below.'],
         ['key' => 'GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID', 'label' => 'Google client id', 'default' => ''],
         ['key' => 'GOTRUE_EXTERNAL_GOOGLE_SECRET', 'label' => 'Google client secret', 'default' => '', 'secret' => true],
-        ['key' => 'GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI', 'label' => 'Google redirect URL', 'default' => '', 'hint' => 'Leave blank for this stack address plus /auth/v1/callback. That is the address to register with Google.'],
+        ['key' => 'GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI', 'label' => 'Google redirect URL', 'default' => '{url}/auth/v1/callback', 'hint' => 'The address to register with Google. Set from the stack address.'],
         ['key' => 'GOTRUE_EXTERNAL_GITHUB_ENABLED', 'label' => 'Turn on GitHub sign-in', 'default' => 'false', 'hint' => 'true once you have the client id and secret below.'],
         ['key' => 'GOTRUE_EXTERNAL_GITHUB_CLIENT_ID', 'label' => 'GitHub client id', 'default' => ''],
         ['key' => 'GOTRUE_EXTERNAL_GITHUB_SECRET', 'label' => 'GitHub client secret', 'default' => '', 'secret' => true],
-        ['key' => 'GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI', 'label' => 'GitHub redirect URL', 'default' => '', 'hint' => 'Leave blank for this stack address plus /auth/v1/callback.'],
+        ['key' => 'GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI', 'label' => 'GitHub redirect URL', 'default' => '{url}/auth/v1/callback', 'hint' => 'The address to register with GitHub. Set from the stack address.'],
         ['key' => 'GOTRUE_EXTERNAL_DISCORD_ENABLED', 'label' => 'Turn on Discord sign-in', 'default' => 'false', 'hint' => 'true once you have the client id and secret below.'],
         ['key' => 'GOTRUE_EXTERNAL_DISCORD_CLIENT_ID', 'label' => 'Discord client id', 'default' => ''],
         ['key' => 'GOTRUE_EXTERNAL_DISCORD_SECRET', 'label' => 'Discord client secret', 'default' => '', 'secret' => true],
-        ['key' => 'GOTRUE_EXTERNAL_DISCORD_REDIRECT_URI', 'label' => 'Discord redirect URL', 'default' => '', 'hint' => 'Leave blank for this stack address plus /auth/v1/callback.'],
+        ['key' => 'GOTRUE_EXTERNAL_DISCORD_REDIRECT_URI', 'label' => 'Discord redirect URL', 'default' => '{url}/auth/v1/callback', 'hint' => 'The address to register with Discord. Set from the stack address.'],
         ['key' => 'OPENAI_API_KEY', 'label' => 'OpenAI key for Studio', 'default' => '', 'secret' => true, 'hint' => 'Optional. Turns on the SQL assistant in Studio.'],
     ],
     'files' => [
@@ -180,6 +180,7 @@ services:
       GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
       GOTRUE_SMS_AUTOCONFIRM: "false"
       # Sign-in with an outside provider. Self-hosted Studio has no page for these.
+      # The redirect fallback is for apps deployed before these settings existed.
       GOTRUE_EXTERNAL_GOOGLE_ENABLED: ${GOTRUE_EXTERNAL_GOOGLE_ENABLED:-false}
       GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID:-}
       GOTRUE_EXTERNAL_GOOGLE_SECRET: ${GOTRUE_EXTERNAL_GOOGLE_SECRET:-}
