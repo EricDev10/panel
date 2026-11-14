@@ -11,7 +11,7 @@ return [
     'port_editable' => true,
     'health' => '/auth/v1/.well-known/jwks.json',
     'health_retries' => 40,
-    'notes' => 'Open the address for Studio and sign in with the Studio user and password. Apps use the public URL with the anon key; the service role key is for your servers only. Postgres is at 127.0.0.1 on the Postgres port, user postgres.supabase, and apps on this machine reach it through {bridge}. Idle it uses about 350 MB of memory, more under load, and edge functions can use up to 2 GB. The first start pulls eleven images and sets up the database, so give it a few minutes.',
+    'notes' => 'Open the address for Studio and sign in with the Studio user and password. Apps use the public URL with the anon key; the service role key is for your servers only. Postgres is at 127.0.0.1 on the Postgres port, user postgres.supabase, and apps on this machine reach it through {bridge}. Studio here has no Auth providers page: Google, GitHub and Discord sign-in are set when you deploy or in the app settings. Logs, reports and anything tied to the hosted Supabase cloud are not in it either. Idle it uses about 350 MB of memory, more under load, and edge functions can use up to 2 GB. The first start pulls eleven images and sets up the database, so give it a few minutes.',
     'env' => [
         ['key' => 'SUPABASE_PUBLIC_URL', 'label' => 'Public URL', 'default' => '{url}', 'hint' => 'Where the API and Studio are reached. Your apps point their Supabase client here.'],
         ['key' => 'SITE_URL', 'label' => 'Site URL', 'default' => '{url}', 'hint' => 'Your app’s address. Sign-in emails send people back here.'],
@@ -37,6 +37,18 @@ return [
         ['key' => 'SMTP_PASS', 'label' => 'SMTP password', 'default' => '', 'secret' => true],
         ['key' => 'SMTP_ADMIN_EMAIL', 'label' => 'Sender email', 'default' => 'admin@example.com'],
         ['key' => 'SMTP_SENDER_NAME', 'label' => 'Sender name', 'default' => 'Supabase'],
+        ['key' => 'GOTRUE_EXTERNAL_GOOGLE_ENABLED', 'label' => 'Turn on Google sign-in', 'default' => 'false', 'hint' => 'true once you have the client id and secret below.'],
+        ['key' => 'GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID', 'label' => 'Google client id', 'default' => ''],
+        ['key' => 'GOTRUE_EXTERNAL_GOOGLE_SECRET', 'label' => 'Google client secret', 'default' => '', 'secret' => true],
+        ['key' => 'GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI', 'label' => 'Google redirect URL', 'default' => '', 'hint' => 'Leave blank for this stack address plus /auth/v1/callback. That is the address to register with Google.'],
+        ['key' => 'GOTRUE_EXTERNAL_GITHUB_ENABLED', 'label' => 'Turn on GitHub sign-in', 'default' => 'false', 'hint' => 'true once you have the client id and secret below.'],
+        ['key' => 'GOTRUE_EXTERNAL_GITHUB_CLIENT_ID', 'label' => 'GitHub client id', 'default' => ''],
+        ['key' => 'GOTRUE_EXTERNAL_GITHUB_SECRET', 'label' => 'GitHub client secret', 'default' => '', 'secret' => true],
+        ['key' => 'GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI', 'label' => 'GitHub redirect URL', 'default' => '', 'hint' => 'Leave blank for this stack address plus /auth/v1/callback.'],
+        ['key' => 'GOTRUE_EXTERNAL_DISCORD_ENABLED', 'label' => 'Turn on Discord sign-in', 'default' => 'false', 'hint' => 'true once you have the client id and secret below.'],
+        ['key' => 'GOTRUE_EXTERNAL_DISCORD_CLIENT_ID', 'label' => 'Discord client id', 'default' => ''],
+        ['key' => 'GOTRUE_EXTERNAL_DISCORD_SECRET', 'label' => 'Discord client secret', 'default' => '', 'secret' => true],
+        ['key' => 'GOTRUE_EXTERNAL_DISCORD_REDIRECT_URI', 'label' => 'Discord redirect URL', 'default' => '', 'hint' => 'Leave blank for this stack address plus /auth/v1/callback.'],
         ['key' => 'OPENAI_API_KEY', 'label' => 'OpenAI key for Studio', 'default' => '', 'secret' => true, 'hint' => 'Optional. Turns on the SQL assistant in Studio.'],
     ],
     'files' => [
@@ -167,6 +179,19 @@ services:
       GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
       GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
       GOTRUE_SMS_AUTOCONFIRM: "false"
+      # Sign-in with an outside provider. Self-hosted Studio has no page for these.
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: ${GOTRUE_EXTERNAL_GOOGLE_ENABLED:-false}
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: ${GOTRUE_EXTERNAL_GOOGLE_SECRET:-}
+      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: ${GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI:-${SUPABASE_PUBLIC_URL}/auth/v1/callback}
+      GOTRUE_EXTERNAL_GITHUB_ENABLED: ${GOTRUE_EXTERNAL_GITHUB_ENABLED:-false}
+      GOTRUE_EXTERNAL_GITHUB_CLIENT_ID: ${GOTRUE_EXTERNAL_GITHUB_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_GITHUB_SECRET: ${GOTRUE_EXTERNAL_GITHUB_SECRET:-}
+      GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI: ${GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI:-${SUPABASE_PUBLIC_URL}/auth/v1/callback}
+      GOTRUE_EXTERNAL_DISCORD_ENABLED: ${GOTRUE_EXTERNAL_DISCORD_ENABLED:-false}
+      GOTRUE_EXTERNAL_DISCORD_CLIENT_ID: ${GOTRUE_EXTERNAL_DISCORD_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_DISCORD_SECRET: ${GOTRUE_EXTERNAL_DISCORD_SECRET:-}
+      GOTRUE_EXTERNAL_DISCORD_REDIRECT_URI: ${GOTRUE_EXTERNAL_DISCORD_REDIRECT_URI:-${SUPABASE_PUBLIC_URL}/auth/v1/callback}
 
   rest:
     image: postgrest/postgrest:v14.18

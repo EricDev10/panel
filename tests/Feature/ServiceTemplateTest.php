@@ -116,6 +116,51 @@ test('Supabase gets its anon and service role keys signed with the JWT secret it
         ->and($claims($env['ANON_KEY'])['exp'])->toBeGreaterThan(now()->addYears(9)->timestamp);
 });
 
+test('Supabase starts with provider sign-in off', function () {
+    [$workspace, , $url] = templateMachine();
+
+    $this->actingAs($workspace->owner)->postJson($url, ['template' => 'supabase', 'service' => 'supabase', 'domain' => 'supa.example.com'])
+        ->assertAccepted();
+
+    $env = sentJob()['env'];
+
+    expect($env['GOTRUE_EXTERNAL_GOOGLE_ENABLED'])->toBe('false')
+        ->and($env['GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID'])->toBe('')
+        ->and($env['GOTRUE_EXTERNAL_GITHUB_ENABLED'])->toBe('false')
+        ->and($env['GOTRUE_EXTERNAL_DISCORD_ENABLED'])->toBe('false')
+        // Blank keeps the compose default, this stack's address plus /auth/v1/callback.
+        ->and($env['GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI'])->toBe('');
+});
+
+test('Supabase passes the sign-in provider settings to the auth service', function () {
+    [$workspace, , $url] = templateMachine();
+
+    $this->actingAs($workspace->owner)->postJson($url, [
+        'template' => 'supabase',
+        'service' => 'supabase',
+        'domain' => 'supa.example.com',
+        'env' => [
+            'GOTRUE_EXTERNAL_GOOGLE_ENABLED' => 'true',
+            'GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID' => 'google-id',
+            'GOTRUE_EXTERNAL_GOOGLE_SECRET' => 'google-secret',
+            'GOTRUE_EXTERNAL_GITHUB_ENABLED' => 'true',
+            'GOTRUE_EXTERNAL_GITHUB_CLIENT_ID' => 'github-id',
+            'GOTRUE_EXTERNAL_GITHUB_SECRET' => 'github-secret',
+        ],
+    ])->assertAccepted();
+
+    $job = sentJob();
+    $compose = $job['files']['compose.yaml'];
+
+    expect($job['env']['GOTRUE_EXTERNAL_GOOGLE_ENABLED'])->toBe('true')
+        ->and($job['env']['GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID'])->toBe('google-id')
+        ->and($job['env']['GOTRUE_EXTERNAL_GOOGLE_SECRET'])->toBe('google-secret')
+        ->and($job['env']['GOTRUE_EXTERNAL_GITHUB_CLIENT_ID'])->toBe('github-id')
+        ->and($compose)->toContain('GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID:-}')
+        ->and($compose)->toContain('GOTRUE_EXTERNAL_DISCORD_SECRET: ${GOTRUE_EXTERNAL_DISCORD_SECRET:-}')
+        ->and($compose)->toContain('GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI: ${GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI:-${SUPABASE_PUBLIC_URL}/auth/v1/callback}');
+});
+
 test('an install from the app installer is recorded with its app, for the admin Stats', function () {
     [$workspace, $machine, $url] = templateMachine();
 
